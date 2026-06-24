@@ -1,5 +1,8 @@
 import Phaser from 'phaser';
 
+/**
+ * GameOverScene - Cena de game over atualizada
+ */
 export default class GameOverScene extends Phaser.Scene {
   constructor() {
     super({ key: 'GameOverScene' });
@@ -8,14 +11,20 @@ export default class GameOverScene extends Phaser.Scene {
   init(data) {
     this.score = data.score || 0;
     this.time = data.time || 0;
+    this.level = data.level || 1;
+    this.position = data.position || 999;
+    this.difficulty = data.difficulty || 'normal';
+    this.playerName = data.playerName || 'Jogador';
   }
 
   create() {
     const { width, height } = this.cameras.main;
 
+    // Fundo
     this.add.rectangle(width / 2, height / 2, width, height, 0x0a0a14).setOrigin(0.5);
 
-    this.add.text(width / 2, height * 0.2, '💀 GAME OVER', {
+    // Título
+    this.add.text(width / 2, height * 0.15, '💀 GAME OVER', {
       font: 'bold 64px Arial',
       fill: '#ff4444',
       align: 'center',
@@ -23,32 +32,52 @@ export default class GameOverScene extends Phaser.Scene {
       strokeThickness: 4,
     }).setOrigin(0.5);
 
+    // Estatísticas
     const seconds = Math.floor(this.time / 1000);
-    const stats = `Pontos: ${this.score}\nTempo: ${seconds}s`;
+    const stats = `
+Jogador: ${this.playerName}
+Nível: ${this.level}
+Dificuldade: ${this.difficulty.toUpperCase()}
+Pontos: ${this.score}
+Tempo: ${seconds}s
+Posição: #${this.position}
+    `;
 
     this.add.text(width / 2, height * 0.45, stats, {
-      font: 'bold 24px Arial',
+      font: 'bold 20px Arial',
       fill: '#00d4ff',
       align: 'center',
-      lineSpacing: 20,
+      lineSpacing: 12,
     }).setOrigin(0.5);
 
-    const menuButton = this.add.rectangle(width / 2, height * 0.75, 200, 50, 0x444444)
+    // Botões
+    // Tentar novamente
+    const retryButton = this.add.rectangle(width * 0.35, height * 0.8, 180, 50, 0x444444)
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true });
 
-    this.add.text(width / 2, height * 0.75, 'MENU', {
-      font: 'bold 24px Arial',
+    this.add.text(width * 0.35, height * 0.8, 'TENTAR NOVAMENTE', {
+      font: 'bold 14px Arial',
       fill: '#ffffff',
     }).setOrigin(0.5);
 
-    menuButton.on('pointerover', () => {
-      menuButton.setFillStyle(0x666666);
+    retryButton.on('pointerdown', () => {
+      this.scene.start('GameScene', {
+        difficulty: this.difficulty,
+        level: this.level,
+        playerName: this.playerName,
+      });
     });
 
-    menuButton.on('pointerout', () => {
-      menuButton.setFillStyle(0x444444);
-    });
+    // Menu
+    const menuButton = this.add.rectangle(width * 0.65, height * 0.8, 180, 50, 0x444444)
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true });
+
+    this.add.text(width * 0.65, height * 0.8, 'MENU', {
+      font: 'bold 14px Arial',
+      fill: '#ffffff',
+    }).setOrigin(0.5);
 
     menuButton.on('pointerdown', () => {
       this.scene.start('MenuScene');
